@@ -32,7 +32,7 @@ type Model struct {
 func LoadModel(exportDir string, tags []string, options *tf.SessionOptions) (model *Model) {
 	var err error
 	model = new(Model)
-	model.saved, err = tf.LoadSavedModel(exportDir, tags, options)
+	model.Saved, err = tf.LoadSavedModel(exportDir, tags, options)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -59,7 +59,7 @@ func ImportModel(serializedModel, prefix string, options *tf.SessionOptions) (mo
 		panic(err.Error())
 	}
 
-	model.saved = &tf.SavedModel{Session: session, Graph: graph}
+	model.Saved = &tf.SavedModel{Session: session, Graph: graph}
 	return
 }
 
@@ -68,7 +68,7 @@ func ImportModel(serializedModel, prefix string, options *tf.SessionOptions) (mo
 // panics on error
 func (model *Model) Exec(tensors []tf.Output, feedDict map[tf.Output]*tf.Tensor) (results []*tf.Tensor) {
 	var err error
-	if results, err = model.saved.Session.Run(feedDict, tensors, nil); err == nil {
+	if results, err = model.Saved.Session.Run(feedDict, tensors, nil); err == nil {
 		return results
 	}
 	panic(err)
@@ -76,7 +76,7 @@ func (model *Model) Exec(tensors []tf.Output, feedDict map[tf.Output]*tf.Tensor)
 
 // Op extracts the output in position idx of the tensor with the specified name from the model graph
 func (model *Model) Op(name string, idx int) tf.Output {
-	op := model.saved.Graph.Operation(name)
+	op := model.Saved.Graph.Operation(name)
 	if op == nil {
 		panic(fmt.Errorf("op %s not found", name))
 	}
